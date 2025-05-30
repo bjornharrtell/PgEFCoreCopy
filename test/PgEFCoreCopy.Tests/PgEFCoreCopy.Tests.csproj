@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PGEFCoreCopy\PgEFCoreCopy.csproj" />
+    <ProjectReference Include="..\..\src\PgEFCoreCopy\PgEFCoreCopy.csproj" />
   </ItemGroup>
 
 </Project>

@@ -59,6 +59,7 @@ public static class DbContextExtensions
         }
 
         await writer.CompleteAsync();
+        await conn.CloseAsync();
     }
 
     private static NpgsqlDbType MapToNpgsqlDbType(Type type)
