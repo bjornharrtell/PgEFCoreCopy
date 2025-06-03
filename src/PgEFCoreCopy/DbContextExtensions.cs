@@ -23,7 +23,7 @@ public static class DbContextExtensions
             throw new InvalidOperationException($"Entity type {typeof(T).Name} does not map to a table.");
 
         var properties = entityType.GetProperties()
-            .Where(p => !p.IsShadowProperty() || (!options.IncludePrimaryKey && p.IsPrimaryKey()))
+            .Where(p => !p.IsShadowProperty() && !(!options.IncludePrimaryKey && p.IsPrimaryKey()))
             .ToList();
 
         var columnNames = properties
