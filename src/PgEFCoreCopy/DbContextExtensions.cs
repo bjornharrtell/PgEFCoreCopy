@@ -6,9 +6,13 @@ using NpgsqlTypes;
 
 namespace Wololo.PgEFCoreCopy;
 
+public record struct ExecuteInsertRangeOptions(bool IncludePrimaryKey = false)
+{
+}
+
 public static class DbContextExtensions
 {
-    public static async Task ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities) where T : class
+    public static async Task ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions()) where T : class
     {
         var entityType = context.Model.FindEntityType(typeof(T)) ??
             throw new InvalidOperationException($"Type {typeof(T).Name} is not an entity type in this context.");
@@ -19,7 +23,7 @@ public static class DbContextExtensions
             throw new InvalidOperationException($"Entity type {typeof(T).Name} does not map to a table.");
 
         var properties = entityType.GetProperties()
-            .Where(p => !p.IsShadowProperty() || p.IsPrimaryKey())
+            .Where(p => !p.IsShadowProperty() || (!options.IncludePrimaryKey && p.IsPrimaryKey()))
             .ToList();
 
         var columnNames = properties
@@ -90,8 +94,8 @@ public static class DbContextExtensions
             return NpgsqlDbType.Bytea;
         if (type.IsEnum)
             return NpgsqlDbType.Integer;
-        if (typeof(Geometry).IsAssignableFrom(type) || 
-            (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && 
+        if (typeof(Geometry).IsAssignableFrom(type) ||
+            (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
              typeof(Geometry).IsAssignableFrom(Nullable.GetUnderlyingType(type))))
         {
             return NpgsqlDbType.Geometry;

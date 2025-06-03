@@ -32,7 +32,7 @@ public class Program
             testContext.Database.EnsureCreated();
             var dateTime = new DateTime(2023, 10, 1, 12, 0, 0, DateTimeKind.Utc);
             for (int i = 0; i < SampleCount; i++)
-                testEntities.Add(new TestEntity { Id = i + 1, Name = $"Test{i + 1}", Name2 = $"Test2{i + 1}", Name3 = $"Test3{i + 1}", Name4 = $"Test4{i + 1}",  CreatedAt = dateTime, IsActive = i % 2 == 0 });
+                testEntities.Add(new TestEntity { Id = i + 1, Name = $"Test{i + 1}", Name2 = $"Test2{i + 1}", Name3 = $"Test3{i + 1}", Name4 = $"Test4{i + 1}", CreatedAt = dateTime, IsActive = i % 2 == 0 });
         }
 
         [IterationCleanup]
@@ -48,7 +48,7 @@ public class Program
             var testContext = serviceProvider.GetRequiredService<TestDbContext>();
             await testContext.ExecuteInsertRangeAsync(testEntities);
         }
-        
+
         [Benchmark]
         public async Task EFCoreBulkExtensions()
         {
