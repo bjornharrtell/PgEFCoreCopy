@@ -12,7 +12,7 @@ public record struct ExecuteInsertRangeOptions(bool IncludePrimaryKey = false)
 
 public static class DbContextExtensions
 {
-    public static async Task ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions()) where T : class
+    public static async Task ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions(), CancellationToken token = default) where T : class
     {
         var entityType = context.Model.FindEntityType(typeof(T)) ??
             throw new InvalidOperationException($"Type {typeof(T).Name} is not an entity type in this context.");
@@ -31,7 +31,7 @@ public static class DbContextExtensions
             .Where(name => !string.IsNullOrEmpty(name))
             .ToList();
 
-        if (!columnNames.Any())
+        if (columnNames.Count == 0)
             throw new InvalidOperationException($"No columns found for entity type {typeof(T).Name}.");
 
         var columns = string.Join(", ", columnNames.Select(c => $"\"{c}\""));
@@ -39,13 +39,13 @@ public static class DbContextExtensions
         if (context.Database.GetDbConnection() is not NpgsqlConnection conn)
             throw new InvalidOperationException("Database connection is not a NpgsqlConnection.");
         if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
+            await conn.OpenAsync(token);
         var tableIdentifier = schemaName == null ? $"\"{tableName}\"" : $"\"{schemaName}\".\"{tableName}\"";
-        using var writer = await conn.BeginBinaryImportAsync($"COPY {tableIdentifier} ({columns}) FROM STDIN (FORMAT BINARY)");
+        using var writer = await conn.BeginBinaryImportAsync($"COPY {tableIdentifier} ({columns}) FROM STDIN (FORMAT BINARY)", token);
 
         foreach (var entity in entities)
         {
-            await writer.StartRowAsync();
+            await writer.StartRowAsync(token);
             foreach (var property in properties)
             {
                 var propertyInfo = typeof(T).GetProperty(property.Name);
@@ -54,15 +54,15 @@ public static class DbContextExtensions
                 var value = propertyInfo.GetValue(entity);
                 if (value == null)
                 {
-                    await writer.WriteNullAsync();
+                    await writer.WriteNullAsync(token);
                     continue;
                 }
                 var npgsqlDbType = MapToNpgsqlDbType(property.ClrType);
-                await writer.WriteAsync(value, npgsqlDbType);
+                await writer.WriteAsync(value, npgsqlDbType, token);
             }
         }
 
-        await writer.CompleteAsync();
+        await writer.CompleteAsync(token);
         await conn.CloseAsync();
     }
 
@@ -97,9 +97,7 @@ public static class DbContextExtensions
         if (typeof(Geometry).IsAssignableFrom(type) ||
             (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
              typeof(Geometry).IsAssignableFrom(Nullable.GetUnderlyingType(type))))
-        {
             return NpgsqlDbType.Geometry;
-        }
         throw new NotSupportedException($"Type {type.Name} is not supported for binary import.");
     }
 }
