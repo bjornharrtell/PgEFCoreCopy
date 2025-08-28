@@ -38,8 +38,11 @@ public static class DbContextExtensions
 
         if (context.Database.GetDbConnection() is not NpgsqlConnection conn)
             throw new InvalidOperationException("Database connection is not a NpgsqlConnection.");
-        if (conn.State != ConnectionState.Open)
+        
+        var wasConnectionOpen = conn.State == ConnectionState.Open;
+        if (!wasConnectionOpen)
             await conn.OpenAsync(token);
+            
         var tableIdentifier = schemaName == null ? $"\"{tableName}\"" : $"\"{schemaName}\".\"{tableName}\"";
         using var writer = await conn.BeginBinaryImportAsync($"COPY {tableIdentifier} ({columns}) FROM STDIN (FORMAT BINARY)", token);
 
@@ -63,7 +66,9 @@ public static class DbContextExtensions
         }
 
         await writer.CompleteAsync(token);
-        await conn.CloseAsync();
+        
+        if (!wasConnectionOpen)
+            await conn.CloseAsync();
     }
 
     private static NpgsqlDbType MapToNpgsqlDbType(Type type)
