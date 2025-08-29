@@ -1,5 +1,7 @@
 # PgEFCoreCopy
 
+[![NuGet Version](https://img.shields.io/nuget/v/PgEFCoreCopy)](https://www.nuget.org/packages/PgEFCoreCopy)
+
 Extension method(s) for EF Core DbContext that use PostgreSQL `COPY` to speed up bulk operations.
 
 Currently only implements `ExecuteInsertRangeAsync`.
