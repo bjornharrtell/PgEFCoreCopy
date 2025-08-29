@@ -1,6 +1,6 @@
 # PgEFCoreCopy
 
-Extension method(s) for DbContext that use `COPY` to speed up bulk operations.
+Extension method(s) for EF Core DbContext that use PostgreSQL `COPY` to speed up bulk operations.
 
 Currently only implements `ExecuteInsertRangeAsync`.
 
