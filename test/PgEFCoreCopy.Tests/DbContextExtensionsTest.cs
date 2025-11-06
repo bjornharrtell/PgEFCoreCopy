@@ -77,6 +77,6 @@ public class DbContextExtensionsTest
         Assert.AreEqual(a[1].Id, 2);
         Assert.AreEqual(a[1].Name, "Test2");
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));
-        Assert.AreEqual(a[1].IsActive, false);       
+        Assert.AreEqual(a[1].IsActive, false);
     }
 }
