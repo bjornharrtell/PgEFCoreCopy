@@ -35,11 +35,12 @@ public class DbContextExtensionsTest
     [TestMethod]
     public async Task BasicTest()
     {
+        var date = new DateOnly(2023, 10, 12);
         var dateTime = new DateTime(2023, 10, 1, 12, 0, 0, DateTimeKind.Utc);
         var testContext = serviceProvider.GetRequiredService<TestDbContext>();
         List<TestEntity> testEntities = [
             new TestEntity { Id = 10, Name = "Test1", CreatedAt = dateTime, IsActive = true },
-            new TestEntity { Id = 20, Name = "Test2", CreatedAt = dateTime, IsActive = false }
+            new TestEntity { Id = 20, Name = "Test2", CreatedAt = dateTime, IsActive = false, ExampleDate = date },
         ];
         await testContext.ExecuteInsertRangeAsync(testEntities, new ExecuteInsertRangeOptions { IncludePrimaryKey = true });
         var count = testContext.TestEntities.Count();
@@ -53,6 +54,7 @@ public class DbContextExtensionsTest
         Assert.AreEqual(a[1].Name, "Test2");
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));
         Assert.AreEqual(a[1].IsActive, false);
+        Assert.AreEqual(a[1].ExampleDate.ToString(), date.ToString());
     }
 
     [TestMethod]
