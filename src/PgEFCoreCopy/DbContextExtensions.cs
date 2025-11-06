@@ -83,6 +83,8 @@ public static class DbContextExtensions
             return NpgsqlDbType.Boolean;
         if (type == typeof(string))
             return NpgsqlDbType.Text;
+        if (type == typeof(DateOnly) || type == typeof(DateOnly?))
+            return NpgsqlDbType.Date;
         if (type == typeof(DateTime) || type == typeof(DateTime?))
             return NpgsqlDbType.TimestampTz;
         if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
