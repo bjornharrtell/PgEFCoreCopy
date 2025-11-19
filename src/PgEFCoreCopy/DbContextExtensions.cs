@@ -12,7 +12,7 @@ public record struct ExecuteInsertRangeOptions(bool IncludePrimaryKey = false)
 
 public static class DbContextExtensions
 {
-    public static async Task ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions(), CancellationToken token = default) where T : class
+    public static async ValueTask<ulong> ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions(), CancellationToken token = default) where T : class
     {
         var entityType = context.Model.FindEntityType(typeof(T)) ??
             throw new InvalidOperationException($"Type {typeof(T).Name} is not an entity type in this context.");
@@ -65,10 +65,12 @@ public static class DbContextExtensions
             }
         }
 
-        await writer.CompleteAsync(token);
+        var rows = await writer.CompleteAsync(token);
         
         if (!wasConnectionOpen)
             await conn.CloseAsync();
+
+        return rows;
     }
 
     private static NpgsqlDbType MapToNpgsqlDbType(Type type)
