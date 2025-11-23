@@ -13,16 +13,16 @@ Currently only implements `ExecuteInsertRangeAsync`.
 ### Results:
 
 ```sh
-BenchmarkDotNet v0.15.0, Linux Ubuntu 24.04.2 LTS (Noble Numbat)
-AMD Ryzen 7 PRO 8840U w/ Radeon 780M Graphics 5.13GHz, 1 CPU, 16 logical and 8 physical cores
-.NET SDK 9.0.106
-  [Host]     : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
-  Job-GFSXSY : .NET 9.0.5 (9.0.525.21509), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+BenchmarkDotNet v0.15.6, Linux Ubuntu 24.04.3 LTS (Noble Numbat)
+AMD Ryzen 7 PRO 8840U w/ Radeon 780M Graphics 1.10GHz, 1 CPU, 16 logical and 8 physical cores
+.NET SDK 10.0.100
+  [Host]     : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
+  Job-CNUJVU : .NET 10.0.0 (10.0.0, 10.0.25.52411), X64 RyuJIT x86-64-v4
 
 InvocationCount=1  UnrollFactor=1  
 
 | Method               | SampleCount | Mean     | Error   | StdDev  |
 |--------------------- |------------ |---------:|--------:|--------:|
-| PgEFCoreCopy         | 200000      | 224.7 ms | 4.30 ms | 5.88 ms |
-| EFCoreBulkExtensions | 200000      | 449.7 ms | 7.78 ms | 7.27 ms |
+| PgEFCoreCopy         | 200000      | 263.9 ms | 5.27 ms | 6.67 ms |
+| EFCoreBulkExtensions | 200000      | 263.9 ms | 5.25 ms | 6.64 ms |
 ```
