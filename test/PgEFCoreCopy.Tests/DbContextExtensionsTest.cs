@@ -46,14 +46,14 @@ public class DbContextExtensionsTest
         var count = testContext.TestEntities.Count();
         Assert.AreEqual(2, count, "Expected 2 entities to be inserted.");
         var a = testContext.TestEntities.ToArray();
-        Assert.AreEqual(a[0].Id, 10);
-        Assert.AreEqual(a[0].Name, "Test1");
+        Assert.AreEqual(10, a[0].Id);
+        Assert.AreEqual("Test1", a[0].Name);
         Assert.AreEqual(a[0].CreatedAt.ToString("o"), dateTime.ToString("o"));
-        Assert.AreEqual(a[0].IsActive, true);
-        Assert.AreEqual(a[1].Id, 20);
-        Assert.AreEqual(a[1].Name, "Test2");
+        Assert.IsTrue(a[0].IsActive);
+        Assert.AreEqual(20, a[1].Id);
+        Assert.AreEqual("Test2", a[1].Name);
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));
-        Assert.AreEqual(a[1].IsActive, false);
+        Assert.IsFalse(a[1].IsActive);
         Assert.AreEqual(a[1].ExampleDate.ToString(), date.ToString());
     }
 
@@ -70,13 +70,13 @@ public class DbContextExtensionsTest
         var count = testContext.TestEntities2.Count();
         Assert.AreEqual(2, count, "Expected 2 entities to be inserted.");
         var a = testContext.TestEntities2.ToArray();
-        Assert.AreEqual(a[0].Id, 1);
-        Assert.AreEqual(a[0].Name, "Test1");
+        Assert.AreEqual(1, a[0].Id);
+        Assert.AreEqual("Test1", a[0].Name);
         Assert.AreEqual(a[0].CreatedAt.ToString("o"), dateTime.ToString("o"));
-        Assert.AreEqual(a[0].IsActive, true);
-        Assert.AreEqual(a[1].Id, 2);
-        Assert.AreEqual(a[1].Name, "Test2");
+        Assert.IsTrue(a[0].IsActive);
+        Assert.AreEqual(2, a[1].Id);
+        Assert.AreEqual("Test2", a[1].Name);
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));
-        Assert.AreEqual(a[1].IsActive, false);
+        Assert.IsFalse(a[1].IsActive);
     }
 }
