@@ -12,6 +12,8 @@ public record struct ExecuteInsertRangeOptions(bool IncludePrimaryKey = false)
 
 public static class DbContextExtensions
 {
+    private static readonly Dictionary<Type, NpgsqlDbType> TypeCache = new();
+    
     public static async ValueTask<ulong> ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions(), CancellationToken token = default) where T : class
     {
         var entityType = context.Model.FindEntityType(typeof(T)) ??
@@ -75,52 +77,61 @@ public static class DbContextExtensions
 
     private static NpgsqlDbType MapToNpgsqlDbType(Type type)
     {
+        if (TypeCache.TryGetValue(type, out var cachedType))
+            return cachedType;
+
+        NpgsqlDbType npgsqlDbType;
+        
         if (type == typeof(int) || type == typeof(int?))
-            return NpgsqlDbType.Integer;
-        if (type == typeof(long) || type == typeof(long?))
-            return NpgsqlDbType.Bigint;
-        if (type == typeof(short) || type == typeof(short?))
-            return NpgsqlDbType.Smallint;
-        if (type == typeof(bool) || type == typeof(bool?))
-            return NpgsqlDbType.Boolean;
-        if (type == typeof(string))
-            return NpgsqlDbType.Text;
-        if (type == typeof(DateOnly) || type == typeof(DateOnly?))
-            return NpgsqlDbType.Date;
-        if (type == typeof(DateTime) || type == typeof(DateTime?))
-            return NpgsqlDbType.TimestampTz;
-        if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
-            return NpgsqlDbType.TimestampTz;
-        if (type == typeof(TimeSpan) || type == typeof(TimeSpan?))
-            return NpgsqlDbType.Interval;
-        if (type == typeof(NodaTime.Instant) || type == typeof(NodaTime.Instant?))
-            return NpgsqlDbType.TimestampTz;
-        if (type == typeof(NodaTime.LocalDate) || type == typeof(NodaTime.LocalDate?))
-            return NpgsqlDbType.Date;
-        if (type == typeof(NodaTime.LocalDateTime) || type == typeof(NodaTime.LocalDateTime?))
-            return NpgsqlDbType.Timestamp;
-        if (type == typeof(NodaTime.LocalTime) || type == typeof(NodaTime.LocalTime?))
-            return NpgsqlDbType.Time;
-        if (type == typeof(NodaTime.Duration) || type == typeof(NodaTime.Duration?))
-            return NpgsqlDbType.Interval;
-        if (type == typeof(NodaTime.Interval) || type == typeof(NodaTime.Interval?))
-            return NpgsqlDbType.TimestampTzRange;
-        if (type == typeof(Guid) || type == typeof(Guid?))
-            return NpgsqlDbType.Uuid;
-        if (type == typeof(decimal) || type == typeof(decimal?))
-            return NpgsqlDbType.Numeric;
-        if (type == typeof(double) || type == typeof(double?))
-            return NpgsqlDbType.Double;
-        if (type == typeof(float) || type == typeof(float?))
-            return NpgsqlDbType.Real;
-        if (type == typeof(byte[]))
-            return NpgsqlDbType.Bytea;
-        if (type.IsEnum)
-            return NpgsqlDbType.Integer;
-        if (typeof(Geometry).IsAssignableFrom(type) ||
+            npgsqlDbType = NpgsqlDbType.Integer;
+        else if (type == typeof(long) || type == typeof(long?))
+            npgsqlDbType = NpgsqlDbType.Bigint;
+        else if (type == typeof(short) || type == typeof(short?))
+            npgsqlDbType = NpgsqlDbType.Smallint;
+        else if (type == typeof(bool) || type == typeof(bool?))
+            npgsqlDbType = NpgsqlDbType.Boolean;
+        else if (type == typeof(string))
+            npgsqlDbType = NpgsqlDbType.Text;
+        else if (type == typeof(DateOnly) || type == typeof(DateOnly?))
+            npgsqlDbType = NpgsqlDbType.Date;
+        else if (type == typeof(DateTime) || type == typeof(DateTime?))
+            npgsqlDbType = NpgsqlDbType.TimestampTz;
+        else if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
+            npgsqlDbType = NpgsqlDbType.TimestampTz;
+        else if (type == typeof(TimeSpan) || type == typeof(TimeSpan?))
+            npgsqlDbType = NpgsqlDbType.Interval;
+        else if (type == typeof(NodaTime.Instant) || type == typeof(NodaTime.Instant?))
+            npgsqlDbType = NpgsqlDbType.TimestampTz;
+        else if (type == typeof(NodaTime.LocalDate) || type == typeof(NodaTime.LocalDate?))
+            npgsqlDbType = NpgsqlDbType.Date;
+        else if (type == typeof(NodaTime.LocalDateTime) || type == typeof(NodaTime.LocalDateTime?))
+            npgsqlDbType = NpgsqlDbType.Timestamp;
+        else if (type == typeof(NodaTime.LocalTime) || type == typeof(NodaTime.LocalTime?))
+            npgsqlDbType = NpgsqlDbType.Time;
+        else if (type == typeof(NodaTime.Duration) || type == typeof(NodaTime.Duration?))
+            npgsqlDbType = NpgsqlDbType.Interval;
+        else if (type == typeof(NodaTime.Interval) || type == typeof(NodaTime.Interval?))
+            npgsqlDbType = NpgsqlDbType.TimestampTzRange;
+        else if (type == typeof(Guid) || type == typeof(Guid?))
+            npgsqlDbType = NpgsqlDbType.Uuid;
+        else if (type == typeof(decimal) || type == typeof(decimal?))
+            npgsqlDbType = NpgsqlDbType.Numeric;
+        else if (type == typeof(double) || type == typeof(double?))
+            npgsqlDbType = NpgsqlDbType.Double;
+        else if (type == typeof(float) || type == typeof(float?))
+            npgsqlDbType = NpgsqlDbType.Real;
+        else if (type == typeof(byte[]))
+            npgsqlDbType = NpgsqlDbType.Bytea;
+        else if (type.IsEnum)
+            npgsqlDbType = NpgsqlDbType.Integer;
+        else if (typeof(Geometry).IsAssignableFrom(type) ||
             (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
              typeof(Geometry).IsAssignableFrom(Nullable.GetUnderlyingType(type))))
-            return NpgsqlDbType.Geometry;
-        throw new NotSupportedException($"Type {type.Name} is not supported for binary import.");
+            npgsqlDbType = NpgsqlDbType.Geometry;
+        else
+            throw new NotSupportedException($"Type {type.Name} is not supported for binary import.");
+
+        TypeCache[type] = npgsqlDbType;
+        return npgsqlDbType;
     }
 }
