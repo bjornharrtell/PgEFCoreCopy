@@ -124,12 +124,19 @@ public static class DbContextExtensions
             npgsqlDbType = NpgsqlDbType.Bytea;
         else if (type.IsEnum)
             npgsqlDbType = NpgsqlDbType.Integer;
+        else if (type == typeof(ulong) || type == typeof(ulong?))
+            npgsqlDbType = NpgsqlDbType.Xid8;
         else if (typeof(Geometry).IsAssignableFrom(type) ||
             (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
              typeof(Geometry).IsAssignableFrom(Nullable.GetUnderlyingType(type))))
             npgsqlDbType = NpgsqlDbType.Geometry;
         else
-            throw new NotSupportedException($"Type {type.Name} is not supported for binary import.");
+        {
+            var typeName = type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)
+                ? Nullable.GetUnderlyingType(type)?.Name ?? type.Name
+                : type.Name;
+            throw new NotSupportedException($"Type {typeName} is not supported for binary import.");
+        }
 
         TypeCache[type] = npgsqlDbType;
         return npgsqlDbType;

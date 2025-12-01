@@ -18,4 +18,5 @@ public class TestEntity
     public LocalTime? NodaLocalTime { get; set; }
     public NodaTime.Duration? NodaDuration { get; set; }
     public Interval? NodaInterval { get; set; }
+    public ulong? UnsignedLong { get; set; }
 }

@@ -106,4 +106,22 @@ public class DbContextExtensionsTest
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));
         Assert.IsFalse(a[1].IsActive);
     }
+
+    [TestMethod]
+    public async Task ULongTest()
+    {
+        var testContext = serviceProvider.GetRequiredService<TestDbContext>();
+        var ulongValue = 12345678901234567890UL;
+        List<TestEntity> testEntities = [
+            new TestEntity { Id = 30, Name = "Test3", CreatedAt = DateTime.UtcNow, UnsignedLong = ulongValue }
+        ];
+        
+        await testContext.ExecuteInsertRangeAsync(testEntities, new ExecuteInsertRangeOptions { IncludePrimaryKey = true });
+        var count = testContext.TestEntities.Count();
+        Assert.AreEqual(3, count, "Expected 3 entities to be inserted.");
+        var entity = testContext.TestEntities.First(e => e.Id == 30);
+        Assert.AreEqual(30, entity.Id);
+        Assert.AreEqual("Test3", entity.Name);
+        Assert.AreEqual(ulongValue, entity.UnsignedLong);
+    }
 }

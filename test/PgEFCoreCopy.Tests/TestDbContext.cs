@@ -11,4 +11,11 @@ public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(
     {
         optionsBuilder.UseNpgsql(o => o.UseNodaTime());
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TestEntity>()
+            .Property(e => e.UnsignedLong)
+            .HasColumnType("xid8");
+    }
 }
