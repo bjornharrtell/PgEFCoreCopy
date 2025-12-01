@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MysticMind.PostgresEmbed;
+using NodaTime;
 
 namespace Wololo.PgEFCoreCopy.Tests;
 
@@ -38,9 +39,27 @@ public class DbContextExtensionsTest
         var date = new DateOnly(2023, 10, 12);
         var dateTime = new DateTime(2023, 10, 1, 12, 0, 0, DateTimeKind.Utc);
         var timeSpan = new TimeSpan(2, 30, 45);
+        var nodaInstant = Instant.FromUtc(2023, 10, 1, 12, 0);
+        var nodaLocalDate = new LocalDate(2023, 10, 12);
+        var nodaLocalDateTime = new LocalDateTime(2023, 10, 1, 12, 30, 45);
+        var nodaLocalTime = new LocalTime(14, 30, 0);
+        var nodaDuration = Duration.FromHours(3) + Duration.FromMinutes(30);
+        var nodaInterval = new Interval(nodaInstant, nodaInstant.Plus(Duration.FromHours(3)));
         var testContext = serviceProvider.GetRequiredService<TestDbContext>();
         List<TestEntity> testEntities = [
-            new TestEntity { Id = 10, Name = "Test1", CreatedAt = dateTime, IsActive = true, Duration = timeSpan },
+            new TestEntity { 
+                Id = 10, 
+                Name = "Test1", 
+                CreatedAt = dateTime, 
+                IsActive = true, 
+                Duration = timeSpan,
+                NodaInstant = nodaInstant,
+                NodaLocalDate = nodaLocalDate,
+                NodaLocalDateTime = nodaLocalDateTime,
+                NodaLocalTime = nodaLocalTime,
+                NodaDuration = nodaDuration,
+                NodaInterval = nodaInterval
+            },
             new TestEntity { Id = 20, Name = "Test2", CreatedAt = dateTime, IsActive = false, ExampleDate = date },
         ];
         await testContext.ExecuteInsertRangeAsync(testEntities, new ExecuteInsertRangeOptions { IncludePrimaryKey = true });
@@ -52,6 +71,12 @@ public class DbContextExtensionsTest
         Assert.AreEqual(a[0].CreatedAt.ToString("o"), dateTime.ToString("o"));
         Assert.IsTrue(a[0].IsActive);
         Assert.AreEqual(a[0].Duration, timeSpan);
+        Assert.AreEqual(a[0].NodaInstant, nodaInstant);
+        Assert.AreEqual(a[0].NodaLocalDate, nodaLocalDate);
+        Assert.AreEqual(a[0].NodaLocalDateTime, nodaLocalDateTime);
+        Assert.AreEqual(a[0].NodaLocalTime, nodaLocalTime);
+        Assert.AreEqual(a[0].NodaDuration, nodaDuration);
+        Assert.AreEqual(a[0].NodaInterval, nodaInterval);
         Assert.AreEqual(20, a[1].Id);
         Assert.AreEqual("Test2", a[1].Name);
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));

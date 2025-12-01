@@ -6,4 +6,9 @@ public class TestDbContext(DbContextOptions<TestDbContext> options) : DbContext(
 {
     public DbSet<TestEntity> TestEntities { get; set; }
     public DbSet<TestEntity2> TestEntities2 { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseNpgsql(o => o.UseNodaTime());
+    }
 }

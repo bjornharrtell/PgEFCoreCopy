@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using NodaTime;
 
 namespace Wololo.PgEFCoreCopy.Tests;
 
@@ -11,4 +12,10 @@ public class TestEntity
     public DateOnly? ExampleDate { get; set; }   
     public bool IsActive { get; set; } = true;
     public TimeSpan? Duration { get; set; }
+    public Instant? NodaInstant { get; set; }
+    public LocalDate? NodaLocalDate { get; set; }
+    public LocalDateTime? NodaLocalDateTime { get; set; }
+    public LocalTime? NodaLocalTime { get; set; }
+    public NodaTime.Duration? NodaDuration { get; set; }
+    public Interval? NodaInterval { get; set; }
 }

@@ -93,6 +93,18 @@ public static class DbContextExtensions
             return NpgsqlDbType.TimestampTz;
         if (type == typeof(TimeSpan) || type == typeof(TimeSpan?))
             return NpgsqlDbType.Interval;
+        if (type == typeof(NodaTime.Instant) || type == typeof(NodaTime.Instant?))
+            return NpgsqlDbType.TimestampTz;
+        if (type == typeof(NodaTime.LocalDate) || type == typeof(NodaTime.LocalDate?))
+            return NpgsqlDbType.Date;
+        if (type == typeof(NodaTime.LocalDateTime) || type == typeof(NodaTime.LocalDateTime?))
+            return NpgsqlDbType.Timestamp;
+        if (type == typeof(NodaTime.LocalTime) || type == typeof(NodaTime.LocalTime?))
+            return NpgsqlDbType.Time;
+        if (type == typeof(NodaTime.Duration) || type == typeof(NodaTime.Duration?))
+            return NpgsqlDbType.Interval;
+        if (type == typeof(NodaTime.Interval) || type == typeof(NodaTime.Interval?))
+            return NpgsqlDbType.TimestampTzRange;
         if (type == typeof(Guid) || type == typeof(Guid?))
             return NpgsqlDbType.Uuid;
         if (type == typeof(decimal) || type == typeof(decimal?))
