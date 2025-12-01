@@ -91,6 +91,8 @@ public static class DbContextExtensions
             return NpgsqlDbType.TimestampTz;
         if (type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?))
             return NpgsqlDbType.TimestampTz;
+        if (type == typeof(TimeSpan) || type == typeof(TimeSpan?))
+            return NpgsqlDbType.Interval;
         if (type == typeof(Guid) || type == typeof(Guid?))
             return NpgsqlDbType.Uuid;
         if (type == typeof(decimal) || type == typeof(decimal?))

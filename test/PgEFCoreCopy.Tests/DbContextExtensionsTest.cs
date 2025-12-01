@@ -37,9 +37,10 @@ public class DbContextExtensionsTest
     {
         var date = new DateOnly(2023, 10, 12);
         var dateTime = new DateTime(2023, 10, 1, 12, 0, 0, DateTimeKind.Utc);
+        var timeSpan = new TimeSpan(2, 30, 45);
         var testContext = serviceProvider.GetRequiredService<TestDbContext>();
         List<TestEntity> testEntities = [
-            new TestEntity { Id = 10, Name = "Test1", CreatedAt = dateTime, IsActive = true },
+            new TestEntity { Id = 10, Name = "Test1", CreatedAt = dateTime, IsActive = true, Duration = timeSpan },
             new TestEntity { Id = 20, Name = "Test2", CreatedAt = dateTime, IsActive = false, ExampleDate = date },
         ];
         await testContext.ExecuteInsertRangeAsync(testEntities, new ExecuteInsertRangeOptions { IncludePrimaryKey = true });
@@ -50,6 +51,7 @@ public class DbContextExtensionsTest
         Assert.AreEqual("Test1", a[0].Name);
         Assert.AreEqual(a[0].CreatedAt.ToString("o"), dateTime.ToString("o"));
         Assert.IsTrue(a[0].IsActive);
+        Assert.AreEqual(a[0].Duration, timeSpan);
         Assert.AreEqual(20, a[1].Id);
         Assert.AreEqual("Test2", a[1].Name);
         Assert.AreEqual(a[1].CreatedAt.ToString("o"), dateTime.ToString("o"));

@@ -10,4 +10,5 @@ public class TestEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateOnly? ExampleDate { get; set; }   
     public bool IsActive { get; set; } = true;
+    public TimeSpan? Duration { get; set; }
 }
