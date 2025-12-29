@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Benchmarks/Benchmarks.csproj" />
+    <Project Path="src/PgEFCoreCopy/PgEFCoreCopy.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/PgEFCoreCopy.Tests/PgEFCoreCopy.Tests.csproj" />
+  </Folder>
+</Solution>
