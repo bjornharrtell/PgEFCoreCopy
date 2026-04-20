@@ -12,7 +12,7 @@ public record struct ExecuteInsertRangeOptions(bool IncludePrimaryKey = false)
 
 public static class DbContextExtensions
 {
-    private static readonly Dictionary<Type, NpgsqlDbType> TypeCache = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, NpgsqlDbType> TypeCache = new();
     
     public static async ValueTask<ulong> ExecuteInsertRangeAsync<T>(this DbContext context, IEnumerable<T> entities, ExecuteInsertRangeOptions options = new ExecuteInsertRangeOptions(), CancellationToken token = default) where T : class
     {
@@ -48,12 +48,19 @@ public static class DbContextExtensions
         var tableIdentifier = schemaName == null ? $"\"{tableName}\"" : $"\"{schemaName}\".\"{tableName}\"";
         using var writer = await conn.BeginBinaryImportAsync($"COPY {tableIdentifier} ({columns}) FROM STDIN (FORMAT BINARY)", token);
 
+        var propertyAccessors = properties
+            .Select(p => typeof(T).GetProperty(p.Name))
+            .ToArray();
+        var npgsqlDbTypes = properties
+            .Select(p => MapToNpgsqlDbType(p.ClrType))
+            .ToArray();
+
         foreach (var entity in entities)
         {
             await writer.StartRowAsync(token);
-            foreach (var property in properties)
+            for (var i = 0; i < properties.Count; i++)
             {
-                var propertyInfo = typeof(T).GetProperty(property.Name);
+                var propertyInfo = propertyAccessors[i];
                 if (propertyInfo == null)
                     continue;
                 var value = propertyInfo.GetValue(entity);
@@ -62,8 +69,7 @@ public static class DbContextExtensions
                     await writer.WriteNullAsync(token);
                     continue;
                 }
-                var npgsqlDbType = MapToNpgsqlDbType(property.ClrType);
-                await writer.WriteAsync(value, npgsqlDbType, token);
+                await writer.WriteAsync(value, npgsqlDbTypes[i], token);
             }
         }
 
