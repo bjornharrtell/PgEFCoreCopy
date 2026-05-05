@@ -69,6 +69,8 @@ public static class DbContextExtensions
                     await writer.WriteNullAsync(token);
                     continue;
                 }
+                if (value is Enum)
+                    value = Convert.ToInt32(value);
                 await writer.WriteAsync(value, npgsqlDbTypes[i], token);
             }
         }
@@ -128,7 +130,7 @@ public static class DbContextExtensions
             npgsqlDbType = NpgsqlDbType.Real;
         else if (type == typeof(byte[]))
             npgsqlDbType = NpgsqlDbType.Bytea;
-        else if (type.IsEnum)
+        else if (type.IsEnum || (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) && Nullable.GetUnderlyingType(type)!.IsEnum))
             npgsqlDbType = NpgsqlDbType.Integer;
         else if (type == typeof(ulong) || type == typeof(ulong?))
             npgsqlDbType = NpgsqlDbType.Xid8;

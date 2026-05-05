@@ -3,6 +3,13 @@ using NodaTime;
 
 namespace Wololo.PgEFCoreCopy.Tests;
 
+public enum TestStatus
+{
+    Active = 0,
+    Inactive = 1,
+    Pending = 2
+}
+
 public class TestEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -19,4 +26,6 @@ public class TestEntity
     public NodaTime.Duration? NodaDuration { get; set; }
     public Interval? NodaInterval { get; set; }
     public ulong? UnsignedLong { get; set; }
+    public TestStatus Status { get; set; } = TestStatus.Active;
+    public TestStatus? NullableStatus { get; set; }
 }

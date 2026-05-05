@@ -124,4 +124,21 @@ public class DbContextExtensionsTest
         Assert.AreEqual("Test3", entity.Name);
         Assert.AreEqual(ulongValue, entity.UnsignedLong);
     }
+
+    [TestMethod]
+    public async Task NullableEnumTest()
+    {
+        var testContext = serviceProvider.GetRequiredService<TestDbContext>();
+        List<TestEntity> testEntities = [
+            new TestEntity { Id = 40, Name = "Test4", CreatedAt = DateTime.UtcNow, Status = TestStatus.Pending, NullableStatus = TestStatus.Inactive },
+            new TestEntity { Id = 50, Name = "Test5", CreatedAt = DateTime.UtcNow, Status = TestStatus.Active, NullableStatus = null }
+        ];
+        await testContext.ExecuteInsertRangeAsync(testEntities, new ExecuteInsertRangeOptions { IncludePrimaryKey = true });
+        var a = testContext.TestEntities.Where(e => e.Id == 40 || e.Id == 50).OrderBy(e => e.Id).ToArray();
+        Assert.AreEqual(2, a.Length);
+        Assert.AreEqual(TestStatus.Pending, a[0].Status);
+        Assert.AreEqual(TestStatus.Inactive, a[0].NullableStatus);
+        Assert.AreEqual(TestStatus.Active, a[1].Status);
+        Assert.IsNull(a[1].NullableStatus);
+    }
 }
