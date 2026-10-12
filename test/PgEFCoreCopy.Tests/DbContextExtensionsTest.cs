@@ -141,4 +141,19 @@ public class DbContextExtensionsTest
         Assert.AreEqual(TestStatus.Active, a[1].Status);
         Assert.IsNull(a[1].NullableStatus);
     }
+
+    [TestMethod]
+    public async Task GeneratedColumnIsSkippedTest()
+    {
+        var testContext = serviceProvider.GetRequiredService<TestDbContext>();
+        List<TestEntity3> testEntities = [
+            new TestEntity3 { Id = 1, Number = 95, Suffix = "J" },
+            new TestEntity3 { Id = 2, Number = 96, Suffix = "" }
+        ];
+        await testContext.ExecuteInsertRangeAsync(testEntities, new ExecuteInsertRangeOptions { IncludePrimaryKey = true });
+        var a = testContext.TestEntities3.OrderBy(e => e.Id).ToArray();
+        Assert.AreEqual(2, a.Length);
+        Assert.AreEqual("95-J", a[0].Label);
+        Assert.AreEqual("96", a[1].Label);
+    }
 }

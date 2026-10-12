@@ -26,6 +26,8 @@ public static class DbContextExtensions
 
         var properties = entityType.GetProperties()
             .Where(p => !p.IsShadowProperty() && !(!options.IncludePrimaryKey && p.IsPrimaryKey()))
+            // Generated columns can't be written with COPY
+            .Where(p => p.GetComputedColumnSql() == null)
             .ToList();
 
         var columnNames = properties
